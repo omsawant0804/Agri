@@ -4,6 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:cropinsights2/widget/SlideAnimation.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+
 
 class SignUpModule extends StatefulWidget {
   const SignUpModule({Key? key});
@@ -38,8 +40,19 @@ class _SignUpModuleState extends State<SignUpModule> {
         : null;
   }
 
-  Future<void> signUp(String email, String password) async {
-    if (email.isNotEmpty && password.isNotEmpty) {
+  Future<void> signUp(String email, String password, String confirmPassword) async {
+    if (email.isNotEmpty && password.isNotEmpty && confirmPassword.isNotEmpty) {
+      if (password != confirmPassword) {
+        // Passwords do not match
+        Fluttertoast.showToast(
+          msg: "Passwords do not match",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+        );
+        return;
+      }
       try {
         final userCredential = await FirebaseAuth.instance
             .createUserWithEmailAndPassword(email: email, password: password);
@@ -58,6 +71,8 @@ class _SignUpModuleState extends State<SignUpModule> {
       }
     }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -366,6 +381,7 @@ class _SignUpModuleState extends State<SignUpModule> {
                                     signUp(
                                       emailController.text.toString(),
                                       passController.text.toString(),
+                                      cpassController.text.toString(), // Pass confirm password here
                                     );
                                   }
                                 },
