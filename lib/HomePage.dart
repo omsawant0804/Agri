@@ -1,4 +1,6 @@
 import 'package:cropinsights2/AddCrop.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cropinsights2/LoginPage.dart';
 import 'package:flutter/material.dart';
 import 'package:cropinsights2/widget/SlideAnimation.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -10,6 +12,12 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  logout()async{
+    FirebaseAuth.instance.signOut().then((value) {
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>LoginModule()));
+
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,10 +54,11 @@ class _HomePageState extends State<HomePage> {
                     ),
                     Align(
                       alignment: AlignmentDirectional(0.94, -0.81),
-                      child: Icon(
-                        Icons.menu,
-                        color: Color(0xFFE8EAEC),
-                        size: 35,
+                      child: IconButton(
+                        icon: Icon(Icons.menu),
+                        onPressed: (){
+                    logout();
+                        },
                       ),
                     ),
                   ],

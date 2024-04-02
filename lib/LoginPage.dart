@@ -1,6 +1,7 @@
 import 'package:cropinsights2/HomePage.dart';
 import 'package:cropinsights2/SignUpPage.dart';
 import 'package:cropinsights2/widget/SlideAnimation.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 class LoginModule extends StatefulWidget {
@@ -33,6 +34,27 @@ class _LoginModuleState extends State<LoginModule> {
         ? 'Enter a valid email address'
         : null;
   }
+  Future<void> login(String email, String password) async {
+    try {
+      final UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      if (userCredential.user != null) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomePage()),
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      // Handle specific firebase auth exceptions here
+      print('Firebase Auth Exception: ${e.message}');
+    } catch (e) {
+      // Handle other exceptions
+      print('Error: $e');
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -212,7 +234,7 @@ class _LoginModuleState extends State<LoginModule> {
                              controller: passController,
                              obscureText: _isObscured,
                              validator: (value){
-                               if(value == null || value.length<8){
+                               if(value == null || value.length<6){
                                   return "enter 8 length password";
                                }
                              },
@@ -310,9 +332,12 @@ class _LoginModuleState extends State<LoginModule> {
                                     ),
                                   ),
                                   onPressed: (){
-                                    _formKey.currentState!.validate();
-                                    Navigator.of(context).push(SlideAnimation(child: HomePage(),
-                                        direction: AxisDirection.left));
+                           if (_formKey.currentState!.validate()) {
+                             login(
+                               emailController.text.toString(),
+                               passController.text.toString(),
+                             );
+                           }
                                   },
                                 ),
                               ),
