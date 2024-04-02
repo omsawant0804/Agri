@@ -1,4 +1,6 @@
+import 'package:cropinsights2/HomePage.dart';
 import 'package:cropinsights2/LoginPage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:cropinsights2/widget/SlideAnimation.dart';
@@ -32,6 +34,19 @@ class _SignUpModuleState extends State<SignUpModule> {
     return value!.isEmpty || !regex.hasMatch(value)
         ? 'Enter a valid email address'
         : null;
+  }
+  singup(String email,String password) async{
+   if(email!=""&&password!=""){
+     UserCredential?usercredential;
+     try {
+       usercredential=await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password);
+       Navigator.push(context,MaterialPageRoute(builder: (context)=>HomePage()));
+     }
+     on FirebaseAuthException catch(ex) {
+       return null;
+     }
+     }
+
   }
   @override
   Widget build(BuildContext context) {
@@ -265,8 +280,8 @@ class _SignUpModuleState extends State<SignUpModule> {
                   child: Padding(
                     padding: EdgeInsetsDirectional.fromSTEB(10, 12, 8, 12),
                     child: TextFormField(
-                      controller: cemailController,
-                      focusNode: cemailFocusNode,
+                      controller: emailController,
+                      focusNode: emailFocusNode,
                       autofocus: true,
                       obscureText: true,
                       decoration: InputDecoration(
@@ -345,7 +360,8 @@ class _SignUpModuleState extends State<SignUpModule> {
                                 ),
                                 onPressed: (){
                                   _formKey.currentState!.validate();
-                                },
+                                  singup(emailController.text.toString(),passController.text.toString());
+                                                                },
                               ),
                             ),
                           ],
