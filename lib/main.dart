@@ -1,8 +1,18 @@
 import 'package:cropinsights2/LoginPage.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: FirebaseOptions(
+    apiKey: "AIzaSyAY_tMpRSkAYG6FuKEygY9dlOKAE2aUqZU",
+    appId: "1:458387710991:android:74311807e05b7a5e4aaf7a",
+    messagingSenderId: "458387710991",
+    projectId: "cropinsight"
+  ));
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+      .then((value) => runApp(MyApp()));
 }
 
 class MyApp extends StatelessWidget {
