@@ -41,6 +41,16 @@ class _SignUpModuleState extends State<SignUpModule> {
         ? 'Enter a valid email address'
         : null;
   }
+  String? validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Password is required';
+    }
+    if (value.length < 6) {
+      return 'Password must be at least 6 characters long';
+    }
+    return null;
+  }
+
 
 
   Future<void> signUp(String email, String password, String confirmPassword) async {
@@ -68,7 +78,7 @@ class _SignUpModuleState extends State<SignUpModule> {
             // Navigate to HomePage after successful sign up
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => HomePage()),
+              MaterialPageRoute(builder: (context) => LoginModule()),
             );
           }
         } catch (e) {
@@ -292,12 +302,8 @@ class _SignUpModuleState extends State<SignUpModule> {
                         fontSize: 18,
                       ),
                       minLines: null,
-                      validator: (value) {
-                        if (value == null || value.length < 8) {
-                          return "Enter 8 characters minimum";
-                        }
-                        return null;
-                      },
+                      validator: validatePassword,
+
                     ),
                   ),
                 ),

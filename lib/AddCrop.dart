@@ -3,6 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:cropinsights2/widget/SlideAnimation.dart';
 import 'package:flutter/material.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 class AddCrop extends StatefulWidget {
   const AddCrop({super.key});
 
@@ -13,12 +15,8 @@ class AddCrop extends StatefulWidget {
 class _AddCropState extends State<AddCrop> {
 
   final List<String> cropType = [
-    'Sandy',
-    'Clayey',
-    'Red',
-    'Loamy',
-    'Black',
-
+    'Maize', 'Sugarcane', 'Cotton', 'Tobacco', 'Paddy', 'Barley',
+    'Wheat', 'Millets', 'Oil seeds', 'Pulses', 'Ground Nuts'
   ];
   final List<String> SoilType = [
     'Sandy',
@@ -35,12 +33,54 @@ class _AddCropState extends State<AddCrop> {
   String? selectedValueSoilType;
   final TextEditingController textEditingControllerSoilType = TextEditingController();
 
+  CollectionReference cropsCollection = FirebaseFirestore.instance.collection('crops');
   @override
   void dispose() {
     textEditingControllerCropType.dispose();
     textEditingControllerSoilType.dispose();
     super.dispose();
   }
+  void addCropDetails() async {
+    // Get the current user
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      // Retrieve the user ID
+      String userId = user.uid;
+
+      // Reference to the 'crops' subcollection under the user's document
+      CollectionReference cropsCollection = FirebaseFirestore.instance.collection('users').doc(userId).collection('crops');
+
+      // Add the crop details to Firestore
+      await cropsCollection.add({
+        'cropname': selectedValueCropType,
+        'soilType': selectedValueSoilType,
+      });
+
+      // Clear selections after adding to Firestore
+      setState(() {
+        selectedValueCropType = null;
+        selectedValueSoilType = null;
+      });
+
+      // Show a snackbar to indicate success
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Crop added successfully!'),
+      ));
+
+      // Navigate back to the homepage
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => HomePage()),
+            (Route<dynamic> route) => false, // Clear the navigation stack
+      );
+    } else {
+      // Handle the case where the user is not authenticated
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('User not authenticated.'),
+      ));
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -300,8 +340,16 @@ class _AddCropState extends State<AddCrop> {
                           hoverColor: Colors.transparent,
                           highlightColor: Colors.transparent,
                           onTap: () async {
-                            Navigator.of(context).push(SlideAnimation(child: HomePage(),
-                                direction: AxisDirection.right));
+                            if (selectedValueCropType != null && selectedValueSoilType != null) {
+                              addCropDetails();
+
+                            } else {
+                              // Show error message if selections are not complete
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                content: Text('Please select crop type and soil type.'),
+                              ));
+                            }
+
                           },
                           child: Text(
                             "Submit",
