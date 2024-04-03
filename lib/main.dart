@@ -1,4 +1,5 @@
 import 'package:cropinsights2/LoginPage.dart';
+import 'package:cropinsights2/checkuser.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -43,7 +44,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const LoginModule(),
+      home:  CheckUser(),
     );
   }
 }
@@ -133,5 +134,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+
   }
+
 }

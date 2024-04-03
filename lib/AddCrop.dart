@@ -239,7 +239,7 @@ class _AddCropState extends State<AddCrop> {
                       child: DropdownButton2<String>(
                         isExpanded: true,
                         hint: Text(
-                          'Select Crop type',
+                          'Select Soil type',
                           style: TextStyle(
                             fontSize: 14,
                             color: Theme.of(context).hintColor,
