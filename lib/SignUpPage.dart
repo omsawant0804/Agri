@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:cropinsights2/widget/SlideAnimation.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 
 class SignUpModule extends StatefulWidget {
@@ -40,6 +42,7 @@ class _SignUpModuleState extends State<SignUpModule> {
         : null;
   }
 
+
   Future<void> signUp(String email, String password, String confirmPassword) async {
     if (email.isNotEmpty && password.isNotEmpty && confirmPassword.isNotEmpty) {
       if (password != confirmPassword) {
@@ -51,28 +54,46 @@ class _SignUpModuleState extends State<SignUpModule> {
           backgroundColor: Colors.red,
           textColor: Colors.white,
         );
-        return;
-      }
-      try {
-        final userCredential = await FirebaseAuth.instance
-            .createUserWithEmailAndPassword(email: email, password: password);
-        if (userCredential.user != null) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => HomePage()),
-          );
+      } else {
+        try {
+          final userCredential = await FirebaseAuth.instance
+              .createUserWithEmailAndPassword(email: email, password: password);
+          if (userCredential.user != null) {
+            // Add user data to Firestore
+            await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set({
+              'email': email,
+              // Add more fields as needed
+            });
+
+            // Navigate to HomePage after successful sign up
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => HomePage()),
+            );
+          }
+        } catch (e) {
+          if (e is FirebaseAuthException) {
+            if (e.code == 'email-already-in-use') {
+              // Email already exists in Firebase
+              Fluttertoast.showToast(
+                msg: "Account already exists for this email",
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.BOTTOM,
+                backgroundColor: Colors.red,
+                textColor: Colors.white,
+              );
+            } else {
+              // Other Firebase Auth exceptions
+              print('Firebase Auth Exception: ${e.message}');
+            }
+          } else {
+            // Other exceptions
+            print('Error: $e');
+          }
         }
-      } on FirebaseAuthException catch (e) {
-        // Handle specific firebase auth exceptions here
-        print('Firebase Auth Exception: ${e.message}');
-      } catch (e) {
-        // Handle other exceptions
-        print('Error: $e');
       }
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {

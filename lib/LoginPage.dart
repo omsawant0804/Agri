@@ -4,6 +4,7 @@ import 'package:cropinsights2/widget/SlideAnimation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 class LoginModule extends StatefulWidget {
   const LoginModule({super.key});
 
@@ -36,7 +37,8 @@ class _LoginModuleState extends State<LoginModule> {
   }
   Future<void> login(String email, String password) async {
     try {
-      final UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+      final UserCredential userCredential =
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
@@ -47,13 +49,50 @@ class _LoginModuleState extends State<LoginModule> {
         );
       }
     } on FirebaseAuthException catch (e) {
-      // Handle specific firebase auth exceptions here
-      print('Firebase Auth Exception: ${e.message}');
+      print('Firebase Auth Exception: ${e.message}'); // Print the error message
+      if (e.code == 'user-not-found') {
+        // Email is not registered
+        Fluttertoast.showToast(
+          msg: "No account found with this email. Please sign up.",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+        );
+      } else if (e.code == 'wrong-password') {
+        // Incorrect password
+        Fluttertoast.showToast(
+          msg: "Invalid credentials. Please try again.",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+        );
+      } else {
+        // Other Firebase Auth exceptions
+        Fluttertoast.showToast(
+          msg: "An error occurred (${e.code}). Please try again later.",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+        );
+      }
     } catch (e) {
       // Handle other exceptions
       print('Error: $e');
+      Fluttertoast.showToast(
+        msg: "An error occurred. Please try again later.",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
     }
   }
+
+
+
 
 
   @override

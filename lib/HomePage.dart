@@ -1,23 +1,69 @@
 import 'package:cropinsights2/AddCrop.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cropinsights2/LoginPage.dart';
 import 'package:flutter/material.dart';
-import 'package:cropinsights2/widget/SlideAnimation.dart';
+import 'package:cropinsights2/LoginPage.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cropinsights2/widget/SlideAnimation.dart';
+
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const HomePage({Key? key});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  logout()async{
-    FirebaseAuth.instance.signOut().then((value) {
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>LoginModule()));
+  String userName = 'Loading...';
 
+  @override
+  void initState() {
+    super.initState();
+    fetchUserInfo();
+  }
+
+  void fetchUserInfo() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final userData = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+
+        if (userData.exists) {
+          setState(() {
+            userName = userData['email'];
+          });
+        } else {
+          setState(() {
+            userName = 'User Data Not Found';
+          });
+          print('User data does not exist');
+        }
+      } else {
+        setState(() {
+          userName = 'User Not Authenticated';
+        });
+        print('User not authenticated');
+      }
+    } catch (e) {
+      setState(() {
+        userName = 'Error Fetching Data: $e';
+      });
+      print('Error fetching user info: $e');
+    }
+  }
+
+  void logout() async {
+    FirebaseAuth.instance.signOut().then((value) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LoginModule()),
+      );
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,7 +87,7 @@ class _HomePageState extends State<HomePage> {
                       child: Padding(
                         padding: EdgeInsetsDirectional.fromSTEB(12, 0, 0, 0),
                         child: Text(
-                          "UserName",
+                          userName,
                           style: TextStyle(
                             fontFamily: 'Readex Pro',
                             color: Color(0xFFE8EAEC),
@@ -56,8 +102,8 @@ class _HomePageState extends State<HomePage> {
                       alignment: AlignmentDirectional(0.94, -0.81),
                       child: IconButton(
                         icon: Icon(Icons.menu),
-                        onPressed: (){
-                    logout();
+                        onPressed: () {
+                          logout();
                         },
                       ),
                     ),
@@ -226,14 +272,14 @@ class _HomePageState extends State<HomePage> {
                   width: 370,
                   height: 60,
                   padding: EdgeInsetsDirectional.fromSTEB(24, 0, 24, 0),
-                    color: Color(0xE80B7E1B),
+                  color: Color(0xE80B7E1B),
                   child: Center(
                     child: Text("Add Crop",
-                    style: TextStyle(
-                      fontFamily: 'Readex Pro',
-                      fontSize: 24,
-                      color: Colors.white,
-                    ),
+                      style: TextStyle(
+                        fontFamily: 'Readex Pro',
+                        fontSize: 24,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
@@ -268,6 +314,5 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
-
   }
 }
